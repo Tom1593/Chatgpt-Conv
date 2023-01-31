@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<div class="header">
+<h1>To start a conversation press record</h1>
+</div>
+{% endblock head %}
+
+{% block body %}
+<button id="start-recording-button">Start Recording</button>
+<button id="stop-recording-button" disabled>Stop Recording</button>
+
+<script>
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+let audioStream;
+  navigator.mediaDevices
+    .getUserMedia({ audio: true })
+    .then(stream => {
+
+        audioStream = stream;
+        const input = audioContext.createMediaStreamSource(stream);
+        const recorder = new MediaRecorder(input.stream);
+        const startRecording = () => {
+
+            recorder.start();
+            console.log(mediaRecorder.state);
+            console.log("recorder started");
+            
+            document.getElementById("start-recording-button").disabled = true;
+            document.getElementById("stop-recording-button").disabled = false;
+        };
+        
+        const chunks = [];
+
+        recorder.ondataavailable = (event) => {
+            chunks.push(event.data);
+         };
+
+        recorder.addEventListener("dataavailable", event => {
+            chunks.push(event.data);
+        });
+
+         recorder.addEventListener("stop", () => {
+            const blob = new Blob(chunks, { type: "audio/webm" });
+            chunks = []
+            
+            
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/record_audio", true);
+            xhr.send(blob);
+
+            //const audioURL = window.URL.createObjectURL(blob);
+            //audio.src = audioURL;
+        }); 
+        const stopRecording = () => {
+            
+            recorder.stop();
+            console.log(recorder.state);
+            console.log("recorder stopped");
+
+            document.getElementById("start-recording-button").disabled = false;
+            document.getElementById("stop-recording-button").disabled = true;
+        };
+
+    })
+    .catch(error => {
+      console.error(error);
+    });
+
+document.getElementById("start-recording-button").addEventListener("click", startRecording);
+document.getElementById("stop-recording-button").addEventListener("click", stopRecording);
+</script>
+
+{%if data.state == transcribe %}
+
+<div class="text">
+    
+
+
+</div>
+
+{%endif%}
+<h1>here were going to record and transcribe</h1>
+{% endblock body %}

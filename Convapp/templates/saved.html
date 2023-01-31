@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+{% endblock head %}
+
+{% block body %}
+    <div class="log">
+    {% for entry in enteries %}
+    <div class="entry">
+        <p><b><h1>{{ entry.owner }}</h1></b></p>
+        <div class="audio controler">
+        <audio controls>
+            <source src = "{{ url_for('event_audio', id=entry.id) }}" type="audio/webm" />
+        </audio>
+        <p>{{ entry.content }}</p>
+        </div>
+    {% endfor %}
+    </div>
+{% endblock body %}
